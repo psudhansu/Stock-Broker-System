@@ -1,4 +1,6 @@
 package com.masai;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -76,5 +78,19 @@ public class CustomerService {
 
 		return false;
 	}
+	public List<Customer> viewAllCustomers(Map<String, Customer> customers) throws ProductException {
+		// TODO Auto-generated method stub
+		List<Customer> list = null;
+
+		if (customers != null && customers.size() > 0) {
+			Collection<Customer> coll = customers.values();
+			list = new ArrayList<>(coll);
+		} else {
+			throw new ProductException("Customer list is empty");
+		}
+
+		return list;
+	}
+	
 	
 }
