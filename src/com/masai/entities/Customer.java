@@ -1,6 +1,8 @@
 package com.masai.entities;
 
-public class Customer extends User {
+import java.io.Serializable;
+
+public class Customer extends User implements Serializable{
 	private double walletBalance;
 
 	public Customer(double walletBalance, String username, String password, String address, String email) {
@@ -18,7 +20,7 @@ public class Customer extends User {
 
 	@Override
 	public String toString() {
-		return "Customer [walletBalance=" + walletBalance + ", getWalletBalance()=" + getWalletBalance()
+		return "Customer [walletBalance=" + getWalletBalance()
 				+ ", getUsername()=" + getUsername() + ", getAddress()=" + getAddress() + ", getEmail()=" + getEmail()
 				+  "]";
 	}

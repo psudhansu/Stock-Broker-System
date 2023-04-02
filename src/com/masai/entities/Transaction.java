@@ -1,6 +1,8 @@
 package com.masai.entities;
 
-public class Transaction {
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
 	private String username;
 	private String email;
 	

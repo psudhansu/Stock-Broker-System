@@ -1,6 +1,8 @@
 package com.masai.entities;
 
-public class Stocks {
+import java.io.Serializable;
+
+public class Stocks implements Serializable{
      private String name;
      private int quantity;
      private double price;

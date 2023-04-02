@@ -35,7 +35,7 @@ public class CustomerService {
 		}
 
 	}
-	public boolean buyProduct(String name, int quantity, String email, Map<String, Stocks> stocks,
+	public boolean buyStock(String name, int quantity, String email, Map<String, Stocks> stocks,
 			Map<String, Customer> customers, List<Transaction> transactions)
 			throws InvalidDetailsException, ProductException {
 
@@ -91,6 +91,23 @@ public class CustomerService {
 
 		return list;
 	}
-	
+	public boolean addMoneyToWallet(double amount, String email, Map<String, Customer> customers) {
+		// TODO Auto-generated method stub
+
+		Customer cus = customers.get(email);
+
+		cus.setWalletBalance(cus.getWalletBalance() + amount);
+
+		customers.put(email, cus);
+
+		return true;
+	}
+	public double viewWalletBalance(String email, Map<String, Customer> customers) {
+		// TODO Auto-generated method stub
+
+		Customer cus = customers.get(email);
+
+		return cus.getWalletBalance();
+	}
 	
 }

@@ -1,4 +1,6 @@
 package com.masai;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -21,10 +23,8 @@ public class Main {
 				System.out.println("Press 1 add the stock");
 				System.out.println("Press 2 view all the stock");
 				System.out.println("Press 3 view all customers");
-				System.out.println("Press 4 to view all transactions");
-				System.out.println("Press 5 delete the stock");
-				System.out.println("Press 6 delete the customer");
-				System.out.println("Press 7 to log out");
+				System.out.println("Press 4 delete the stock");
+				System.out.println("Press 5 to log out");
 				choice = sc.nextInt();
 
 				
@@ -40,11 +40,16 @@ public class Main {
 				case 3:
 					adminViewAllCustomers(customers,cusService);
 					break;
-				case 5:
+				case 4:
 					adminDeleteStock(sc,stocks,stoService);
 					break;
+				case 5:
+					System.out.println("admin has successfully logout");
+					break;
+				default:
+					throw new IllegalArgumentException("Unexpected value: " + choice);
 				}
-			}while (choice <= 6);
+			}while (choice <= 4);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
@@ -71,7 +76,7 @@ public class Main {
 		String name = sc.next();
 		System.out.println("Enter the stock qty(fixed 500)");
 		int qty = sc.nextInt();
-		System.out.println("Enter the stock price/piece");
+		System.out.println("Enter the stock price");
 		double price = sc.nextDouble();
 		
 
@@ -102,7 +107,7 @@ public class Main {
 		stoService.deleteStock(nm,stocks);
 	}
 	// customer functionality
-		public static void customerFunctionality(Scanner sc,Map<String, Stocks> stocks, Map<String, Customer> customers)
+		public static void customerFunctionality(Scanner sc,Map<String, Stocks> stocks, Map<String, Customer> customers,List<Transaction> transactions)
 				throws InvalidDetailsException, TransactionException {
 			StockService stoService = new StockService();
 			CustomerService cusService = new CustomerService();
@@ -118,19 +123,36 @@ public class Main {
 				do {
 					System.out.println("Select the option of your choice");
 					System.out.println("Press 1 to view all stocks");
-					System.out.println("Press 2 to buy a stock");
-					System.out.println("Press 3 view my transactions");
-					System.out.println("Press 4 to add money to my wallet");
-					System.out.println("Press 5 view wallet balance");
-					System.out.println("Press 6 to logout");
+					System.out.println("Press 2 to add money to my wallet");
+					System.out.println("Press 3 to buy a stock");
+					System.out.println("Press 4 view wallet balance");
+					System.out.println("Press 5 to logout");
 					choice = sc.nextInt();
 
 					switch (choice) {
 					case 1:
 						customerViewAllStocks(stocks, stoService);
 						break;
+					case 2:
+						String moneyAdded = customerAddMoneyToWallet(sc, email, customers, cusService);
+						System.out.println(moneyAdded);
+						break;
+					case 3:
+						String result = customerBuyProduct(sc, email, stocks, customers, transactions, cusService);
+						System.out.println(result);
+						break;
+					case 4:
+						double walletBalance = customerViewWalletBalance(email, customers, cusService);
+						System.out.println("Wallet balance is: " + walletBalance);
+						break;
+					case 5:
+						System.out.println("you have successsfully logout");
+						break;
+					default:
+						System.out.println("invalid choice");
+						break;
 					}
-				}while(choice<=6);
+				}while(choice<=4);
 			}catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
@@ -168,14 +190,41 @@ public class Main {
 				throws ProductException {
 			stoService.viewAllStocks(stocks);
 		}
+		public static String customerAddMoneyToWallet(Scanner sc, String email, Map<String, Customer> customers,
+				CustomerService cusService) {
+			System.out.println("please enter the amount");
+			double money = sc.nextDouble();
+			boolean added = cusService.addMoneyToWallet(money, email, customers);
+
+			return "Amount: " + money + " successfully added to your wallet";
+		}
+		public static double customerViewWalletBalance(String email, Map<String, Customer> customers,
+				CustomerService cusService) {
+			double walletBalance = cusService.viewWalletBalance(email, customers);
+			return walletBalance;
+		}
+		public static String customerBuyProduct(Scanner sc, String email, Map<String, Stocks> stocks,
+				Map<String, Customer> customers, List<Transaction> transactions, CustomerService cusService)
+				throws InvalidDetailsException, ProductException {
+			System.out.println("Enter the Stock name");
+			String name = sc.next();
+			System.out.println("enter the quantity you want to buy");
+			int quantity = sc.nextInt();
+			cusService.buyStock(name, quantity, email, stocks, customers, transactions);
+
+			return "You have successfully bought the stock";
+
+		}
    public static void main(String args[]) {
 	   Scanner sc = new Scanner(System.in);
-	   Map<String, Stocks> stocks = new TreeMap<>();
-	   Map<String, Customer> customers = new TreeMap<>();
+	   Map<String, Stocks> stocks = FileEx.stockFile();
+	   Map<String, Customer> customers = FileEx.customerFile();
+	   List<Transaction> transactions = FileEx.transactionFile();
 		try {
 
 			int preference = 0;
 			do {
+				System.out.println("---------Welcome to Stock Broker System--------");
 				System.out.println("Please enter your preference, " + " '1' --> Admin login , '2' --> Customer login , "
 				+ "'3' for Customer signup, '0' for exit");
 				preference = sc.nextInt();
@@ -184,7 +233,7 @@ public class Main {
 					adminFunctionality(sc,stocks,customers);
 					break;
 				case 2:
-					customerFunctionality(sc,stocks, customers);
+					customerFunctionality(sc,stocks, customers,transactions);
 					break;
 
 				case 3:
@@ -207,6 +256,21 @@ public class Main {
 		} catch (Exception e) {
 
 			System.out.println(e.getMessage());
+		} finally {
+			// serialization (finally always executed)
+			try {
+				ObjectOutputStream poos = new ObjectOutputStream(new FileOutputStream("Stock.sdn"));
+				poos.writeObject(stocks);
+				ObjectOutputStream coos = new ObjectOutputStream(new FileOutputStream("Customer.sdn"));
+				coos.writeObject(customers);
+
+				ObjectOutputStream toos = new ObjectOutputStream(new FileOutputStream("Transactions.sdn"));
+				toos.writeObject(transactions);
+				System.out.println("serialized..........");
+			} catch (Exception e) {
+				// TODO: handle exception
+				System.out.println(e.getMessage());
+			}
 		}
    }
 }
