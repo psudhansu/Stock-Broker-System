@@ -1,6 +1,8 @@
 # novel-salt-5032
 This is a console-based mini project implemented in Java. The project simulates a simple stock broker system that allows users to create accounts, buy stock  and check their account balance .
 
+# Er Diagram
+![Image20230614112520](https://github.com/psudhansu/novel-salt-5032/assets/119405182/bd56e212-cc6a-4e6b-a907-031dde1a03c9)
 
 ## Here 2 users in the system:
 
